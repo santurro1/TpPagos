@@ -1,0 +1,15 @@
+{
+  "expo": {
+    "name": "AppQr",
+    "slug": "AppQr",
+    "version": "1.0.0",
+      "android": {
+        "permissions": ["CAMERA"]
+      },
+      "ios": {
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app uses the camera to take pictures."
+      }
+    }
+  }
+}
