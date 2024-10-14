@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, Alert } from 'react-native';
+import { View, Text, Button, Alert, StyleSheet } from 'react-native';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 
 const PaymentScreen = ({ route, navigation }) => {
@@ -8,6 +8,7 @@ const PaymentScreen = ({ route, navigation }) => {
   const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
 
+  // Solicitar permiso para la cámara
   useEffect(() => {
     (async () => {
       const { status } = await BarCodeScanner.requestPermissionsAsync();
@@ -15,58 +16,75 @@ const PaymentScreen = ({ route, navigation }) => {
     })();
   }, []);
 
-  useEffect(() => {
-    console.log('Parámetros recibidos:', route.params); // Verificar los parámetros
-  }, [route.params]);
-
+  // Manejar el escaneo del código QR
   const handleBarCodeScanned = async ({ type, data }) => {
     setScanned(true);
-    const qrData = JSON.parse(data); // Suponiendo que el QR contiene un JSON
+    const qrData = JSON.parse(data); // Suponiendo que el QR contiene un JSON con la transacción
 
-    // Comprobar que el ID de transacción coincida
-    //if (qrData.transactionID === transactionID) {
-      const response = await fetch('http://192.168.1.100:3000/process-payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId: 'user1', amountToPay: qrData.amountToPay }),
-      });
+    // Aquí actualizamos el estado con el monto que viene en el QR
+    setAmountToPay(qrData.amountToPay); 
 
-      const result = await response.json();
-      console.log(result)
-      if (response.ok) {
-        Alert.alert('Pago confirmado', `Nuevo saldo: $${result.newBalance}`);
-        navigation.navigate('Home', { newBalance: result.newBalance });
-      } else {
-        Alert.alert('Error', result.error);
-      }
-    //} else {
-    //  Alert.alert('Código QR inválido', 'El ID de transacción no coincide.');
-   // }
+    // Realizamos el proceso de pago
+    const response = await fetch('http://192.168.1.100:3000/process-payment', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userId: 'user1', amountToPay: qrData.amountToPay }),
+    });
+
+    const result = await response.json();
+    console.log(result);
+    if (response.ok) {
+      Alert.alert('Pago confirmado', `Nuevo saldo: $${result.newBalance}`);
+      navigation.navigate('Home', { newBalance: result.newBalance });
+    } else {
+      Alert.alert('Error', result.error);
+    }
   };
 
   if (hasPermission === null) {
-    return <Text>Solicitando permiso para la cámara</Text>;
+    return <Text style={styles.infoText}>Solicitando permiso para la cámara</Text>;
   }
   if (hasPermission === false) {
-    return <Text>No se puede acceder a la cámara</Text>;
+    return <Text style={styles.infoText}>No se puede acceder a la cámara</Text>;
   }
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={styles.container}>
       <BarCodeScanner
         onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
-        style={{ flex: 1 }}
+        style={styles.scanner}
       />
-      {scanned && <Button title={'Escanear de nuevo'} onPress={() => setScanned(false)} />}
-      <Text>Monto a pagar: ${amountToPay}</Text>
     </View>
   );
 };
 
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#f8f9fa',
+  },
+  scanner: {
+    width: '100%',
+    height: '70%',
+    marginBottom: 20,
+  },
+  infoText: {
+    fontSize: 16,
+    color: '#333',
+    textAlign: 'center',
+  },
+  amountText: {
+    fontSize: 18,
+    fontWeight: '500',
+    color: '#000',
+    marginTop: 10,
+    textAlign: 'center',
+  },
+});
+
 export default PaymentScreen;
-
-
-
-

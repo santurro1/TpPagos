@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button } from 'react-native';
+import { View, Text, Button, StyleSheet, TouchableOpacity } from 'react-native';
 
 const HomeScreen = ({ navigation, route }) => {
   const [CurrentBalance, setCurrentBalance] = useState(0); // Saldo actual del usuario
@@ -35,12 +35,61 @@ const HomeScreen = ({ navigation, route }) => {
   };
 
   return (
-    <View>
-      <Text>Saldo actual: ${CurrentBalance}</Text>
-      <Button title="Escanear QR para realizar un pago" onPress={handlePayPress} />
+    <View style={styles.container}>
+      <View style={styles.balanceContainer}>
+        <Text style={styles.balanceText}>Saldo actual</Text>
+        <Text style={styles.balanceAmount}>${CurrentBalance}</Text>
+      </View>
+      <TouchableOpacity style={styles.button} onPress={handlePayPress}>
+        <Text style={styles.buttonText}>Escanear QR para realizar un pago</Text>
+      </TouchableOpacity>
     </View>
   );
 };
 
-export default HomeScreen;
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f0f4f7',
+  },
+  balanceContainer: {
+    backgroundColor: '#ffffff',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginBottom: 30,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  balanceText: {
+    fontSize: 18,
+    color: '#333',
+    marginBottom: 5,
+  },
+  balanceAmount: {
+    fontSize: 36,
+    fontWeight: 'bold',
+    color: '#2a9d8f',
+  },
+  button: {
+    backgroundColor: '#2a9d8f',
+    paddingVertical: 15,
+    paddingHorizontal: 40,
+    borderRadius: 25,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  buttonText: {
+    color: '#ffffff',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+});
 
+export default HomeScreen;
